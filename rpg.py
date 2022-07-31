@@ -31,21 +31,20 @@ cur.execute("UPDATE polls_cord SET XyCords='n' WHERE PieceId='pieceS'")
 dbase.commit()
 dbase.close()
 
-# ADDRESS CYCLE
-none = [0, 0, 0, 0 ,0]
-spaces = ['00', '01', '02', '10', '11', '12', '20', '21', '22']
-fixed = ['00', '02', '10', '12', '20', '22']
+none = [0, 0, 0, 0 ,0]                                                              # EMPTY UID REF
+spaces = ['00', '01', '02', '10', '11', '12', '20', '21', '22']                     # CORDS ON GRID
+fixed = ['00', '02', '10', '12', '20', '22']                                        # FIXED CORDS FOR GAME
 board_state = [tuple((0, none)),tuple((1, none)),tuple((2, none)),tuple((3, none)),
                tuple((4, none)),tuple((5, none)),tuple((6, none)),tuple((7, none)),
-               tuple((8, none))]
+               tuple((8, none))]                                                    # EMPTY BOARD STATE
 
-#           0 1 4 5 6 7 9 13
-#                           15
+# ADDRESS CYCLE
 S3_cycle = [0,0,0,0,0,0,1,1,1]
 S2_cycle = [0,0,1,1,1,1,0,1,1]
 S1_cycle = [0,0,0,0,1,1,0,0,1]
 S0_cycle = [0,1,0,1,0,1,1,1,1]
 
+# SEND PLAYER MOVE TO DATABASE
 def send_data(state):
     dbase = sqlite3.connect('db.sqlite3')
     cur = dbase.cursor()
@@ -65,6 +64,7 @@ def send_data(state):
     dbase.commit()
     dbase.close()
 
+# TANSLATE GAME LOOP ITERATION TO SENSOR CORD
 def decode_cords(state):
     new_state = []
     for i, t in enumerate(state):
@@ -98,6 +98,7 @@ try:
     num_moves = 0
     while (True):
         board_state_temp = []
+        # CHECK EVERY SENSOR IN ADDRESS LOOP
         for i in range(9):
             GPIO.setmode(GPIO.BOARD)
             GPIO.setwarnings(False)
@@ -123,6 +124,7 @@ try:
             reader.Close_MFRC522()
         board_state_temp.sort(key=lambda tup: tup[0])
         board_state.sort(key=lambda tup: tup[0])
+        # IF BOARD STATE HAS CHANGED, DOUBLE CHECK THEN UPDATE DATABASE
         if board_state != board_state_temp:
             for index, t in enumerate(board_state_temp):
                 if board_state[index] != board_state_temp[index]:
