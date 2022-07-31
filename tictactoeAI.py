@@ -31,21 +31,20 @@ cur.execute("UPDATE polls_cord SET XyCords='y' WHERE PieceId='pieceS'")
 dbase.commit()
 dbase.close()
 
-# ADDRESS CYCLE
-none = [0, 0, 0, 0 ,0]
-spaces = ['00', '01', '02', '10', '11', '12', '20', '21', '22']
-fixed = ['02', '11', '20', '21', '22']
+none = [0, 0, 0, 0 ,0]                                                              # EMPTY UID REF
+spaces = ['00', '01', '02', '10', '11', '12', '20', '21', '22']                     # CORDS ON GRID
+fixed = ['02', '11', '20', '21', '22']                                              # FIXED CORDS FOR GAME
 board_state = [tuple((0, none)),tuple((1, none)),tuple((2, none)),tuple((3, none)),
                tuple((4, none)),tuple((5, none)),tuple((6, none)),tuple((7, none)),
-               tuple((8, none))]
+               tuple((8, none))]                                                    # EMPTY BOARD STATE
 
-#           0 2 6 8 9 10  14
-#                       11  15
+# ADDRESS CYCLE
 S3_cycle = [0,0,0,1,1,1,1,1,1]
 S2_cycle = [0,0,1,0,0,0,0,1,1]
 S1_cycle = [0,1,1,0,0,1,1,1,1]
 S0_cycle = [0,0,0,0,1,0,1,0,1]
     
+# CHECK BOARD FOR POTENTIAL CHAINS OF 2 OR 3 OF THE SAME SYMBOL
 def state_for_computer(state):
     chains = []
     chains_of_3 = []
@@ -68,14 +67,17 @@ def state_for_computer(state):
                 chains_of_2.append(chain)
     return chains_of_3, chains_of_2
 
+# ADD IMAGINARY PIECE TO BOARD STATE
 def imagine_X(cord, current_state):
     current_state.append(tuple((cord, 'X')))
     imaginary_state = sorted(current_state)
     return state_for_computer(imaginary_state)
 
+# AI MOVE
 def comp_move(state, num_moves):
     dbase = sqlite3.connect('db.sqlite3')
     cur = dbase.cursor()
+    # GET OCCUPIED SPACES AND DERIVE UNOCCUPIED SPACES
     query = "SELECT * FROM polls_cord WHERE XyCords != 'none' AND XyCords != 'n' AND XyCords != 'y'"
     occupied = []
     occupied_ref = []
@@ -83,16 +85,19 @@ def comp_move(state, num_moves):
         occupied.append(row[4])
         occupied_ref.append(tuple((row[4], row[3])))
     unoccupied = sorted(set(occupied) ^ set(spaces))
+    # CHECK IF IT IS THE AI'S TURN AND IF MAXIMUM NUMBER OF MOVES HAS BEEN EXCEEDED
     query = "SELECT * FROM polls_cord WHERE PieceId = 'pieceS'"
     for row in cur.execute(query):
         if row[4] == 'n' or num_moves > 2:
             dbase.close()
             return 'not turn'
+    # CHECK CURRENT BOARD STATE FOR CHAINS OF 2 OR 3
     current_state = state_for_computer(sorted(occupied_ref))
     if len(current_state[0]) != 0:
         dbase.close()
         return 'winner'
     winning_moves = []
+    # DERIVE NEXT MOVE BASED ON MOST BENEFICIAL IMAGINARY MOVE (MINIMAX)
     for potential_X in unoccupied:
         imaginary_state = imagine_X(potential_X, occupied_ref)
         if len(imaginary_state[0]) > 0:
@@ -101,6 +106,7 @@ def comp_move(state, num_moves):
             for item in imaginary_state[1]:
                 if item not in current_state[1]:
                     winning_moves.append(tuple((2, potential_X)))
+    # MAKE MOVE IF MOVE FOUND
     if len(sorted(winning_moves)) > 0:
         winners = [item for item in winning_moves if item[0] == 1]
         almost_winners = [item for item in winning_moves if item[0] == 2]
@@ -117,6 +123,7 @@ def comp_move(state, num_moves):
         dbase.commit()
     dbase.close()
 
+# SEND PLAYER MOVE TO DATABASE
 def send_data(state, num_moves):
     dbase = sqlite3.connect('db.sqlite3')
     cur = dbase.cursor()
@@ -137,6 +144,7 @@ def send_data(state, num_moves):
     dbase.close()
     comp_move(state, num_moves)
 
+# TANSLATE GAME LOOP ITERATION TO SENSOR CORD
 def decode_cords(state):
     new_state = []
     for i, t in enumerate(state):
@@ -167,9 +175,11 @@ print ("Script running")
 print ("Press Ctrl+C to stop")
 
 try:
+    # MAX NUMBER OF AI MOVES COUNTER
     num_moves = 0
     while (True):
         board_state_temp = []
+        # CHECK EVERY SENSOR IN ADDRESS LOOP
         for i in range(9):
             GPIO.setmode(GPIO.BOARD)
             GPIO.setwarnings(False)
@@ -195,6 +205,7 @@ try:
             reader.Close_MFRC522()
         board_state_temp.sort(key=lambda tup: tup[0])
         board_state.sort(key=lambda tup: tup[0])
+        # IF BOARD STATE HAS CHANGED, DOUBLE CHECK THEN UPDATE DATABASE
         if board_state != board_state_temp:
             for index, t in enumerate(board_state_temp):
                 if board_state[index] != board_state_temp[index]:
