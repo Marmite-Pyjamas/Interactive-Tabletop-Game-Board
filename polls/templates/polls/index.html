@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Home</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.css">
+        <style>
+            table { border-collapse: collapse; }
+            table { width: 90%; }
+            table { empty-cells: show; }
+            td { width: 25%; }
+            td { height: 100px; }
+            td { position: relative; }
+            td { text-align: center; }
+            td { font-family: Helvetica, sans-serif; }
+            td { font-weight: bold; }
+            td { font-size: 60px; }
+            table, th, td { border: 5px solid; }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <h1>RPG Game</h1>
+    <div id ="display">
+        
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => 
+        {
+            setInterval(function() 
+            {
+                fetch("{% url 'polls:getBoardState' %}").then(res => res.json().then(json => 
+                {
+                    console.log(json);
+                    const item = document.querySelector("#display");
+                    while (item.firstChild)
+                    {
+                        item.removeChild(item.firstChild);
+                    }
+                    const currentCords = [];
+                    for(var key in json.cords) {
+                        for(var key1 in json.cords[key]) {
+                            if (typeof json.cords[key][key1] === 'string')
+                            {
+                                currentCords.push(json.cords[key][key1]);   
+                            }
+                        }
+                    }
+                    let state = 0;
+                    let tableTag = document.createElement("table");
+                    let tableRowTag0 = document.createElement("tr");
+                    let tableRowTag1 = document.createElement("tr");
+                    let tableRowTag2 = document.createElement("tr");
+                    let tableDataTag00 = document.createElement("td");
+                    let tableDataTag01 = document.createElement("td");
+                    let tableDataTag02 = document.createElement("td");
+                    let tableDataTag10 = document.createElement("td");
+                    let tableDataTag11 = document.createElement("td");
+                    let tableDataTag12 = document.createElement("td");
+                    let tableDataTag20 = document.createElement("td");
+                    let tableDataTag21 = document.createElement("td");
+                    let tableDataTag22 = document.createElement("td");
+                    tableDataTag00.textContent = "";
+                    tableDataTag01.textContent = "";
+                    tableDataTag02.textContent = "";
+                    tableDataTag10.textContent = "";
+                    tableDataTag11.textContent = "";
+                    tableDataTag12.textContent = "";
+                    tableDataTag20.textContent = "";
+                    tableDataTag21.textContent = "";
+                    tableDataTag22.textContent = "";
+                    console.log(currentCords);
+                    for (let i = 0; i < currentCords.length; i++) 
+                    {
+                        if (/^\d+$/.test(currentCords[i]))
+                        {
+                            let x = currentCords[i].charAt(0);
+                            let y = currentCords[i].charAt(1);
+                            if (currentCords[i-1] == "#")
+                            {
+                                state = 1;
+                            } else if (currentCords[i-1] == "|")
+                            {
+                                state = 2;
+                            } else
+                            {
+                                state = 0;
+                            }
+                            if (x == "0")
+                            {
+                                if (y == "0")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag00.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag00.textContent = currentCords[i - 1];
+                                        tableDataTag00.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag00.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "1")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag01.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag01.textContent = currentCords[i - 1];
+                                        tableDataTag01.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag01.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "2")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag02.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag02.textContent = currentCords[i - 1];
+                                        tableDataTag02.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag02.style.backgroundColor = "black";
+                                    }
+                                }
+                            } else if (x == "1")
+                            {
+                                if (y == "0")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag10.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag10.textContent = currentCords[i - 1];
+                                        tableDataTag10.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag10.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "1")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag11.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag11.textContent = currentCords[i - 1];
+                                        tableDataTag11.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag11.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "2")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag12.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag12.textContent = currentCords[i - 1];
+                                        tableDataTag12.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag12.style.backgroundColor = "black";
+                                    }
+                                }
+                            } else if (x == "2")
+                            {
+                                if (y == "0")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag20.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag20.textContent = currentCords[i - 1];
+                                        tableDataTag20.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag20.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "1")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag21.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag21.textContent = currentCords[i - 1];
+                                        tableDataTag21.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag21.style.backgroundColor = "black";
+                                    }
+                                } else if (y == "2")
+                                {
+                                    if (state == 0)
+                                    {
+                                        tableDataTag22.textContent = currentCords[i - 1];
+                                    } else if (state == 1)
+                                    {
+                                        tableDataTag22.textContent = currentCords[i - 1];
+                                        tableDataTag22.style.color = "red";
+                                    } else
+                                    {
+                                        tableDataTag22.style.backgroundColor = "black";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    tableRowTag0.appendChild(tableDataTag00)
+                    tableRowTag0.appendChild(tableDataTag01)
+                    tableRowTag0.appendChild(tableDataTag02)
+                    tableRowTag1.appendChild(tableDataTag10)
+                    tableRowTag1.appendChild(tableDataTag11)
+                    tableRowTag1.appendChild(tableDataTag12)
+                    tableRowTag2.appendChild(tableDataTag20)
+                    tableRowTag2.appendChild(tableDataTag21)
+                    tableRowTag2.appendChild(tableDataTag22)
+                    tableTag.appendChild(tableRowTag0)
+                    tableTag.appendChild(tableRowTag1)
+                    tableTag.appendChild(tableRowTag2)
+                    document.querySelector("#display").appendChild(tableTag);
+                })).catch(res => 
+                {
+                    console.log(res);
+                });
+            },1000);
+        })
+    </script>
+</html>
