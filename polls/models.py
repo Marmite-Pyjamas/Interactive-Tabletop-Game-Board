@@ -3,8 +3,10 @@ import datetime
 from django.db import models
 from django.utils import timezone
 
-# Create your models here.
+# Models file
 
+# The following models are the data strcutres for the database
+# Question and Choice were used in early development, not in use
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
@@ -23,6 +25,7 @@ class Choice(models.Model):
     def __str__(self):
         return self.choice_text
     
+# Data structure for piece entries into database
 class Cord(models.Model):
     playerId = models.CharField(max_length=1000)
     pieceId = models.CharField(max_length=1000)
