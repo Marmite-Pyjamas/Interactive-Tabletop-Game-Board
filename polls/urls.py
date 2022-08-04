@@ -1,6 +1,9 @@
 from django.urls import path
 from . import views
 
+# Urls file
+
+# Only getBoardState path is currently in use
 app_name = 'polls'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
